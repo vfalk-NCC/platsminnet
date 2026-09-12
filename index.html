@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platsminnet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#eef1f2; --surface:#ffffff; --surface-2:#e4e9eb; --border:#d3dbde;
+    --text:#16232d; --text-dim:#5c6c76; --text-faint:#8a969e;
+    --accent:#1c7896; --accent-contrast:#ffffff; --accent-soft:#d9edf3;
+    --warn:#c66a1c; --warn-soft:#f7e3cf;
+    --danger:#ac3527; --danger-soft:#f6dcd8;
+    --ok:#2c7a51; --ok-soft:#d9ecdf;
+    --shadow: 0 10px 30px -12px rgba(22,35,45,.28);
+    --radius: 10px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f151b; --surface:#171f27; --surface-2:#1f2932; --border:#2b3742;
+      --text:#e7edf1; --text-dim:#9aa8b1; --text-faint:#69767f;
+      --accent:#5fc3ea; --accent-contrast:#08222c; --accent-soft:#173340;
+      --warn:#eda15c; --warn-soft:#3a2a17;
+      --danger:#e2685a; --danger-soft:#3a1e1a;
+      --ok:#5fc98d; --ok-soft:#152d21;
+      --shadow: 0 10px 30px -12px rgba(0,0,0,.6);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f151b; --surface:#171f27; --surface-2:#1f2932; --border:#2b3742;
+    --text:#e7edf1; --text-dim:#9aa8b1; --text-faint:#69767f;
+    --accent:#5fc3ea; --accent-contrast:#08222c; --accent-soft:#173340;
+    --warn:#eda15c; --warn-soft:#3a2a17;
+    --danger:#e2685a; --danger-soft:#3a1e1a;
+    --ok:#5fc98d; --ok-soft:#152d21;
+    --shadow: 0 10px 30px -12px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:"IBM Plex Sans", system-ui, sans-serif;
+    font-size:15px; line-height:1.5;
+    padding: 20px 16px 64px;
+  }
+  .wrap{ max-width: 880px; margin: 0 auto; }
+  h1,h2,h3{ font-family:"IBM Plex Sans", sans-serif; text-wrap:balance; margin:0; }
+  code, .mono{ font-family:"IBM Plex Mono", monospace; }
+  button{ font-family:inherit; }
+  :focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- header ---- */
+  .topbar{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    font-family:"IBM Plex Mono", monospace; font-weight:600; font-size:13px;
+    background:var(--accent); color:var(--accent-contrast);
+    width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    flex:none;
+  }
+  .brand h1{ font-size:20px; font-weight:700; letter-spacing:-.01em; }
+  .brand .subtitle{ margin:2px 0 0; font-size:12.5px; color:var(--text-dim); font-family:"IBM Plex Mono", monospace; }
+  .view-toggle{ display:flex; background:var(--surface-2); border-radius:8px; padding:3px; gap:2px; }
+  .view-toggle button{
+    border:0; background:transparent; color:var(--text-dim); font-size:13px; font-weight:600;
+    padding:7px 14px; border-radius:6px; cursor:pointer;
+  }
+  .view-toggle button.active{ background:var(--surface); color:var(--text); box-shadow: var(--shadow); }
+
+  /* ---- banner ---- */
+  .banner{
+    display:flex; gap:12px; align-items:flex-start; background:var(--accent-soft); border:1px solid var(--accent);
+    color:var(--text); border-radius:var(--radius); padding:12px 14px; font-size:13.5px; margin-bottom:16px;
+  }
+  .banner p{ margin:0; flex:1; color:var(--text); }
+  .banner strong{ font-weight:600; }
+  .banner button{ border:0; background:transparent; color:var(--accent); font-weight:600; font-size:13px; cursor:pointer; flex:none; }
+  .banner[hidden]{ display:none; }
+
+  /* ---- quick add ---- */
+  .quickadd{ margin-bottom:14px; }
+  #quickForm{ display:flex; flex-direction:column; gap:9px; }
+  .qa-row1{ display:flex; gap:8px; }
+  #quickInput{
+    flex:1; padding:12px 14px; border-radius:var(--radius); border:1px solid var(--border);
+    background:var(--surface); color:var(--text); font-size:14.5px;
+  }
+  #quickInput::placeholder{ color:var(--text-faint); }
+  .qa-row1 button{
+    border:0; background:var(--accent); color:var(--accent-contrast); font-weight:600; font-size:14px;
+    padding:0 18px; border-radius:var(--radius); cursor:pointer; flex:none;
+  }
+  .qa-row2{ display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; }
+  .qa-row2 select, .qa-row2 input[type="date"]{
+    border:1px solid var(--border); background:var(--surface); color:var(--text);
+    border-radius:8px; padding:7px 9px; font-size:12.5px; font-family:"IBM Plex Mono",monospace;
+  }
+
+  /* ---- tag-select (dropdown + add-your-own) ---- */
+  .tagselect{ position:relative; display:inline-flex; min-width:0; }
+  .field .tagselect{ flex:1; }
+  .tagselect .ts-select{ width:100%; }
+  .ts-addform{
+    display:flex; gap:6px; margin-top:6px; position:absolute; top:100%; left:0;
+    background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px;
+    box-shadow:var(--shadow); z-index:6; white-space:nowrap;
+  }
+  .ts-addform input{
+    border:1px solid var(--border); background:var(--surface-2); border-radius:6px;
+    padding:6px 8px; font-size:12px; color:var(--text); width:110px; font-family:"IBM Plex Sans",sans-serif;
+  }
+  .ts-addform input.ts-code{ width:80px; font-family:"IBM Plex Mono",monospace; }
+  .ts-addform button{ border:0; border-radius:6px; padding:0 9px; font-size:12px; cursor:pointer; flex:none; }
+  .ts-confirm{ background:var(--accent); color:var(--accent-contrast); font-weight:600; }
+  .ts-cancel{ background:var(--surface-2); color:var(--text-dim); display:flex; align-items:center; justify-content:center; }
+
+  /* ---- chips / badges ---- */
+  .chip{
+    display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600;
+    padding:4px 9px; border-radius:100px; font-family:"IBM Plex Mono", monospace; white-space:nowrap;
+    border:1px solid transparent;
+  }
+  .chip-area{ background:var(--surface-2); color:var(--text-dim); }
+  .chip-sub{ background:var(--accent-soft); color:var(--accent); }
+  .chip-prio-hög, .chip-prio-akut{ background:var(--warn-soft); color:var(--warn); }
+  .chip-prio-akut{ background:var(--danger-soft); color:var(--danger); }
+  .chip-due{ background:var(--surface-2); color:var(--text-dim); }
+  .chip-due.due-today{ background:var(--warn-soft); color:var(--warn); }
+  .chip-due.due-over{ background:var(--danger-soft); color:var(--danger); }
+  .chip-due.due-ok{ background:var(--ok-soft); color:var(--ok); }
+  .chip-ghost{ background:var(--surface); color:var(--text-dim); border-color:var(--border); }
+  .chip-example{ background:var(--surface-2); color:var(--text-faint); font-style:italic; font-family:"IBM Plex Sans"; text-transform:none; letter-spacing:0; }
+
+  /* ---- filter row ---- */
+  .filters{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:18px; }
+  .filter-group{ display:flex; flex-wrap:wrap; gap:6px; }
+  .fbtn{
+    border:1px solid var(--border); background:var(--surface); color:var(--text-dim);
+    font-size:12px; font-weight:600; padding:6px 11px; border-radius:100px; cursor:pointer;
+    font-family:"IBM Plex Mono", monospace;
+  }
+  .fbtn.on{ background:var(--accent); color:var(--accent-contrast); border-color:var(--accent); }
+  .search-box{ position:relative; margin-left:auto; }
+  .search-box input{
+    padding:7px 12px 7px 30px; border-radius:100px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text); font-size:12.5px; width:160px;
+  }
+  .search-box svg{ position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--text-faint); }
+
+  /* ---- today strip ---- */
+  .today-strip{ margin-bottom:18px; }
+  .today-strip h2{ font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-dim); margin-bottom:8px; font-family:"IBM Plex Mono",monospace; }
+  .today-row{ display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+  .today-card{
+    flex:none; width:220px; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--danger);
+    border-radius:var(--radius); padding:10px 12px; cursor:pointer; box-shadow:var(--shadow);
+  }
+  .today-card.today{ border-left-color: var(--warn); }
+  .today-card .t-title{ font-size:13px; font-weight:600; margin-bottom:6px; }
+  .today-row:empty::after{ content:"Inget bråttom just nu."; color:var(--text-faint); font-size:13px; }
+
+  /* ---- sections / list ---- */
+  .section{ margin-bottom:22px; }
+  .section-head{
+    display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; margin-bottom:10px;
+    padding-bottom:6px; border-bottom:1px solid var(--border);
+  }
+  .section-head h2{ font-size:13.5px; font-weight:700; }
+  .section-head .count{ font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--text-dim); background:var(--surface-2); padding:1px 7px; border-radius:100px; }
+  .section-head svg{ margin-left:auto; transition: transform .15s ease; color:var(--text-dim); }
+  .section.collapsed .section-head svg{ transform:rotate(-90deg); }
+  .section.collapsed .card-list{ display:none; }
+  .card-list{ display:flex; flex-direction:column; gap:8px; }
+  .card-list:empty::after{ content:"Inga uppgifter här."; color:var(--text-faint); font-size:13px; padding:10px 2px; display:block; }
+
+  .task-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:11px 13px; cursor:pointer; display:flex; flex-direction:column; gap:7px;
+    transition: border-color .12s ease;
+  }
+  .task-card:hover{ border-color:var(--accent); }
+  .task-card .t-top{ display:flex; align-items:flex-start; gap:8px; }
+  .task-card .t-title{ font-size:14px; font-weight:600; flex:1; }
+  .task-card.done .t-title{ text-decoration:line-through; color:var(--text-dim); }
+  .prio-dot{ width:8px; height:8px; border-radius:50%; margin-top:5px; flex:none; }
+  .prio-dot.Låg{ background:var(--text-faint); }
+  .prio-dot.Normal{ background:var(--accent); }
+  .prio-dot.Hög{ background:var(--warn); }
+  .prio-dot.Akut{ background:var(--danger); }
+  .t-meta{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .t-links{ display:flex; gap:10px; margin-left:auto; color:var(--text-faint); }
+  .t-links span{ display:inline-flex; align-items:center; gap:3px; font-family:"IBM Plex Mono",monospace; font-size:11px; }
+  .t-links svg{ width:13px; height:13px; }
+
+  /* ---- board ---- */
+  .board{ display:flex; gap:14px; overflow-x:auto; padding-bottom:10px; }
+  .board-col{ flex:1 1 250px; min-width:250px; background:var(--surface-2); border-radius:12px; padding:10px; }
+  .board-col-head{ display:flex; align-items:center; gap:6px; padding:4px 4px 10px; font-size:12.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; text-transform:uppercase; letter-spacing:.04em; color:var(--text-dim); }
+  .board-col-head .count{ background:var(--surface); padding:1px 7px; border-radius:100px; }
+  .board-col .card-list{ min-height:40px; }
+  .board-col.drop-hover{ outline:2px dashed var(--accent); outline-offset:-4px; }
+  .task-card[draggable="true"]{ cursor:grab; }
+
+  /* ---- ideas panel ---- */
+  .ideas{ margin-top:30px; border-top:1px solid var(--border); padding-top:16px; }
+  .ideas-toggle{
+    background:transparent; border:0; color:var(--text-dim); font-weight:600; font-size:13px; cursor:pointer;
+    padding:0; font-family:"IBM Plex Mono",monospace;
+  }
+  .ideas-body{ margin-top:12px; display:none; }
+  .ideas.open .ideas-body{ display:block; }
+  .ideas.open .ideas-toggle{ color:var(--text); }
+  .ideas ul{ margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px; }
+  .ideas li{ font-size:13.5px; color:var(--text-dim); }
+  .ideas li strong{ color:var(--text); }
+
+  /* ---- overlay + drawer ---- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(10,16,20,.45); opacity:0; pointer-events:none;
+    transition:opacity .18s ease; z-index:20;
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .drawer{
+    position:fixed; top:0; right:0; height:100%; width:min(440px, 100%);
+    background:var(--surface); border-left:1px solid var(--border); box-shadow:var(--shadow);
+    transform:translateX(100%); transition:transform .2s ease; z-index:21; overflow-y:auto;
+    display:flex; flex-direction:column;
+  }
+  .drawer.show{ transform:translateX(0); }
+  .drawer-head{ display:flex; align-items:center; gap:10px; padding:16px 18px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); z-index:2; }
+  .drawer-head input.title-input{
+    flex:1; border:0; background:transparent; font-size:16px; font-weight:700; color:var(--text); padding:4px 0;
+  }
+  .drawer-close{ border:0; background:var(--surface-2); color:var(--text-dim); width:30px; height:30px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex:none; }
+  .drawer-body{ padding:16px 18px 40px; display:flex; flex-direction:column; gap:20px; }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field label{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; }
+  .field select, .field input[type="date"], .field textarea{
+    border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px;
+    padding:8px 10px; font-size:13.5px; font-family:inherit;
+  }
+  .field textarea{ resize:vertical; min-height:60px; }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+
+  .link-section h3{ font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .link-list{ display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+  .link-item{ display:flex; align-items:center; gap:8px; background:var(--surface-2); border-radius:8px; padding:7px 10px; font-size:13px; }
+  .link-item .li-main{ flex:1; min-width:0; }
+  .link-item .li-name{ font-weight:600; }
+  .link-item .li-sub{ font-size:11px; color:var(--text-dim); font-family:"IBM Plex Mono",monospace; }
+  .link-item button{ border:0; background:transparent; color:var(--text-faint); cursor:pointer; flex:none; }
+  .link-item button:hover{ color:var(--danger); }
+  .photo-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+  .photo-thumb{ position:relative; width:72px; height:72px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+  .photo-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-thumb button{
+    position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; border:0;
+    background:rgba(10,16,20,.65); color:#fff; font-size:11px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .link-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .ghost-btn{
+    border:1px dashed var(--border); background:transparent; color:var(--text-dim); font-size:12px; font-weight:600;
+    padding:7px 11px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  }
+  .ghost-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .picker{ background:var(--surface-2); border-radius:10px; padding:10px; margin-top:8px; display:none; }
+  .picker.show{ display:block; }
+  .picker-title{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; margin-bottom:8px; }
+  .picker-row{ display:flex; align-items:center; gap:8px; background:var(--surface); border-radius:7px; padding:7px 9px; margin-bottom:6px; font-size:12.5px; }
+  .picker-row .pr-main{ flex:1; }
+  .picker-row .pr-sub{ color:var(--text-dim); font-family:"IBM Plex Mono",monospace; font-size:11px; }
+  .picker-row button{ border:0; background:var(--accent); color:var(--accent-contrast); font-size:11px; font-weight:600; padding:5px 9px; border-radius:6px; cursor:pointer; }
+  .manual-add{ display:flex; gap:6px; margin-top:6px; }
+  .manual-add input{ flex:1; border:1px solid var(--border); background:var(--surface); border-radius:6px; padding:6px 8px; font-size:12.5px; color:var(--text); }
+  .manual-add button{ border:0; background:var(--surface); border:1px solid var(--border); color:var(--text-dim); border-radius:6px; padding:0 10px; cursor:pointer; font-size:12px; }
+
+  .comments{ display:flex; flex-direction:column; gap:8px; }
+  .comment{ background:var(--surface-2); border-radius:8px; padding:8px 10px; font-size:13px; }
+  .comment .c-time{ font-size:10.5px; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; margin-top:3px; display:block; }
+  .comment-add{ display:flex; gap:6px; }
+  .comment-add input{ flex:1; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px; padding:8px 10px; font-size:13px; }
+  .comment-add button{ border:0; background:var(--surface-2); color:var(--text-dim); border-radius:8px; padding:0 12px; cursor:pointer; font-weight:600; font-size:12.5px; }
+
+  .danger-zone{ margin-top:6px; }
+  .delete-task{ border:0; background:transparent; color:var(--danger); font-size:12.5px; font-weight:600; cursor:pointer; padding:6px 0; }
+
+  .sync-note{ font-size:11px; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; padding:2px 18px 14px; }
+
+  .fab{
+    position:fixed; right:22px; bottom:24px; width:52px; height:52px; border-radius:50%;
+    background:var(--accent); color:var(--accent-contrast); border:0; box-shadow:var(--shadow);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:15;
+  }
+  .fab:hover{ filter:brightness(1.06); }
+
+  @media (max-width: 480px){
+    body{ padding:14px 12px 56px; }
+    .drawer{ width:100%; }
+    .search-box{ margin-left:0; width:100%; }
+    .search-box input{ width:100%; }
+    .fab{ right:16px; bottom:16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">PM</span>
+      <div>
+        <h1>Platsminnet</h1>
+        <p class="subtitle" id="connStatus">Ansluter till Trimble Connect…</p>
+      </div>
+    </div>
+    <div class="view-toggle" id="viewToggle">
+      <button data-view="list" class="active" type="button">Lista</button>
+      <button data-view="board" type="button">Tavla</button>
+    </div>
+  </header>
+
+  <div class="banner" id="infoBanner">
+    <p><strong>Kända begränsningar (v1).</strong> Uppgifterna sparas lokalt i den här webbläsaren (inte delat mellan datorer/kollegor ännu). Objektlänkning hämtas live från modellen via Workspace API. Ritningar länkas manuellt tills vidare — ingen sheet-API är kopplad än.</p>
+    <button id="bannerClose" type="button">Stäng</button>
+  </div>
+
+  <div class="banner" id="connBanner" hidden style="border-color:var(--warn); background:var(--warn-soft);">
+    <p><strong>Ingen koppling till Trimble Connect.</strong> Öppnad utanför ett projekt — objektlänkning är avstängd, men uppgiftslistan fungerar som vanligt.</p>
+  </div>
+
+  <section class="quickadd">
+    <form id="quickForm">
+      <div class="qa-row1">
+        <input id="quickInput" type="text" placeholder="Vad ska göras?" autocomplete="off" />
+        <button type="submit">Lägg till</button>
+      </div>
+      <div class="qa-row2" id="quickControls"></div>
+    </form>
+  </section>
+
+  <section class="today-strip">
+    <h2>Idag &amp; försenat</h2>
+    <div class="today-row" id="todayRow"></div>
+  </section>
+
+  <section class="filters" id="filters"></section>
+
+  <main id="main"></main>
+
+  <section class="ideas" id="ideas">
+    <button class="ideas-toggle" type="button" id="ideasToggle">▾ Idéer till nästa version</button>
+    <div class="ideas-body">
+      <ul>
+        <li><strong>Delad lagring.</strong> Just nu sparas allt i webbläsarens lokala lagring (per dator). Nästa steg är att flytta lagringen till en delad plats — t.ex. en fil i Trimble Connect-projektet eller en liten molndatabas — så att kollegor ser samma lista.</li>
+        <li><strong>Live-uppdaterad markering.</strong> Lyssna på modellens markeringshändelse direkt istället för att klicka "Hämta markering", så föreslagna objekt dyker upp automatiskt när du klickar i modellen.</li>
+        <li><strong>Ritningskoppling.</strong> Koppla mot Trimble Connects ritnings-/sheet-vy när rätt API är bekräftat, istället för manuell inmatning.</li>
+        <li><strong>Notis till UE.</strong> Skicka en TC-kommentar eller Teams-webhook till rätt UE när en uppgift kopplas till dem i UE-listan.</li>
+        <li><strong>Skapa markering i modellen.</strong> Länka mot ditt annoteringsverktyg så att en klar uppgift automatiskt sätter en markering på plats.</li>
+        <li><strong>Fota → skapa uppgift.</strong> Koppling mot Geotaggade foton-verktyget: ett nytt platsfoto kan föreslå en uppgift direkt.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer"></aside>
+
+<button class="fab" id="fabPhoto" type="button" title="Snabbfoto → ny uppgift" aria-label="Snabbfoto, skapa ny uppgift">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M8 6l1.5-2.5h5L16 6"/><circle cx="12" cy="13" r="3.2"/></svg>
+</button>
+<input type="file" id="fabPhotoInput" accept="image/*" capture="environment" multiple style="display:none" />
+
+<!--
+  Trimble Connect Workspace API — official npm package, loaded via a plain
+  script tag (no bundler), matching the rest of Platsminnet's self-contained
+  single-file build. Pin the version; bump deliberately.
+  https://www.npmjs.com/package/trimble-connect-workspace-api
+-->
+<script src="https://cdn.jsdelivr.net/npm/trimble-connect-workspace-api@0.3.34/dist/iife/trimbleconnect.workspace.api.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  var AREAS = ["741","742","744","745"];
+  var AREA_LABELS = {"741":"Sektionsfickor","742":"Sikthall","744":"Fläkthus","745":"Förtjockarhus"};
+  var SUBS = ["Procyon","Wikströms","JIAB","AFI"];
+  var STATUSES = ["Att göra","Pågår","Väntar","Klar"];
+  var PRIORITIES = ["Låg","Normal","Hög","Akut"];
+  var REPEAT_LABELS = {"":"Ingen","weekly":"Varje vecka","biweekly":"Varannan vecka","monthly":"Varje månad"};
+
+  /* ---------------- local storage (v1 persistence) ----------------
+     Everything lives in this browser's localStorage, keyed under
+     PLATSMINNET_NS. Swap Store's three functions for a shared backend
+     (a JSON file in the TC project, or a small hosted API) later —
+     nothing else in the file needs to change. */
+  var PLATSMINNET_NS = "platsminnet_v1_";
+  var Store = {
+    readTasks: function(){
+      try{ return JSON.parse(localStorage.getItem(PLATSMINNET_NS + "tasks") || "[]"); }
+      catch(e){ return []; }
+    },
+    writeTasks: function(list){
+      try{ localStorage.setItem(PLATSMINNET_NS + "tasks", JSON.stringify(list)); return true; }
+      catch(e){ console.warn("localStorage full/unavailable", e); return false; }
+    },
+    readOptions: function(){
+      try{ return JSON.parse(localStorage.getItem(PLATSMINNET_NS + "options") || "{}"); }
+      catch(e){ return {}; }
+    },
+    writeOptions: function(opts){
+      try{ localStorage.setItem(PLATSMINNET_NS + "options", JSON.stringify(opts)); }catch(e){}
+    }
+  };
+
+  var ICON = {
+    plus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    link: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M10 7H7a5 5 0 0 0 0 10h3"/><path d="M14 7h3a5 5 0 0 1 0 10h-3"/></svg>',
+    drawing: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+    photo: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M8 6l1.5-2.5h5L16 6"/><circle cx="12" cy="13" r="3.2"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0-.8 12.2a2 2 0 0 1-2 1.8H9.8a2 2 0 0 1-2-1.8L7 7"/></svg>',
+    close: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+    search: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+    repeat: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
+    download: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
+    cameraBig: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M8 6l1.5-2.5h5L16 6"/><circle cx="12" cy="13" r="3.2"/></svg>',
+    target: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>'
+  };
+
+  var TC = null;            // connected Workspace API, once available
+  var tcModelNames = {};    // modelId -> model name, filled by getModels()
+  var tasks = [];
+  var view = "list";
+  var openTaskId = null;
+  var filters = { area: new Set(), sub: new Set(), onlyPriority: false, q: "" };
+  var collapsed = { "Klar": true };
+
+  function uid(){ return "id-" + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+  function todayISO(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
+  function fmtDate(iso){
+    if(!iso) return null;
+    var d = new Date(iso + "T00:00:00");
+    return d.toLocaleDateString("sv-SE", {day:"numeric", month:"short"});
+  }
+  function dueClass(iso, status){
+    if(!iso || status === "Klar") return {cls:"", label: iso ? fmtDate(iso) : "Inget datum"};
+    var d = new Date(iso + "T00:00:00");
+    var t = todayISO();
+    var diff = Math.round((d - t) / 86400000);
+    if(diff < 0) return {cls:"due-over", label:"Försenad " + Math.abs(diff) + "d"};
+    if(diff === 0) return {cls:"due-today", label:"Idag"};
+    if(diff <= 3) return {cls:"due-ok", label: fmtDate(iso)};
+    return {cls:"", label: fmtDate(iso)};
+  }
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function relTime(iso){
+    try{
+      var d = new Date(iso), diff = (Date.now() - d.getTime())/1000;
+      var rtf = new Intl.RelativeTimeFormat("sv", {numeric:"auto"});
+      if(diff < 60) return "just nu";
+      if(diff < 3600) return rtf.format(-Math.round(diff/60), "minute");
+      if(diff < 86400) return rtf.format(-Math.round(diff/3600), "hour");
+      return rtf.format(-Math.round(diff/86400), "day");
+    }catch(e){ return ""; }
+  }
+
+  /* ---------------- platsområden & UE: built-in + egna ---------------- */
+  var customAreas = [];   // [{code, label}]
+  var customSubs = [];    // [name, ...]
+
+  function effectiveAreas(){ return AREAS.concat(customAreas.map(function(a){ return a.code; })); }
+  function effectiveSubs(){ return SUBS.concat(customSubs); }
+  function areaLabel(code){
+    if(AREA_LABELS[code]) return AREA_LABELS[code];
+    var found = customAreas.filter(function(a){ return a.code === code; })[0];
+    return found ? (found.label || found.code) : code;
+  }
+  function persistOptions(){
+    Store.writeOptions({areas: customAreas, subs: customSubs});
+  }
+  function loadOptions(){
+    var d = Store.readOptions();
+    customAreas = d.areas || [];
+    customSubs = d.subs || [];
+  }
+
+  /* A <select> of platsområde/UE values, with a built-in "+ Lägg till eget" row
+     that reveals a small inline form instead of a browser-native prompt. */
+  function tagSelectHTML(id, kind, selected){
+    var list = kind === "area" ? effectiveAreas() : effectiveSubs();
+    var emptyLabel = kind === "area" ? "Inget område" : "Ingen UE";
+    var opts = '<option value=""' + (!selected ? " selected" : "") + '>' + emptyLabel + '</option>';
+    opts += list.map(function(v){
+      var label = kind === "area" ? ("#" + v + " " + areaLabel(v)) : v;
+      return '<option value="' + esc(v) + '"' + (v === selected ? " selected" : "") + '>' + esc(label) + '</option>';
+    }).join("");
+    opts += '<option value="__add__">+ Lägg till eget…</option>';
+    var addFields = kind === "area"
+      ? '<input class="ts-code" placeholder="Kod, t.ex. 746" maxlength="12"/><input class="ts-label" placeholder="Namn (valfritt)"/>'
+      : '<input class="ts-label" placeholder="Namn på UE"/>';
+    return '<div class="tagselect" id="' + id + '">' +
+      '<select class="ts-select">' + opts + '</select>' +
+      '<div class="ts-addform" hidden>' + addFields +
+        '<button type="button" class="ts-confirm">Lägg till</button>' +
+        '<button type="button" class="ts-cancel">' + ICON.close + '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* Wires a tagSelectHTML() instance. onChange(value|null) fires for a normal
+     pick, a cancelled add, or a confirmed new value (which is also persisted). */
+  function wireTagSelect(id, kind, onChange){
+    var root = document.getElementById(id);
+    if(!root) return;
+    var sel = root.querySelector(".ts-select");
+    var form = root.querySelector(".ts-addform");
+    sel.addEventListener("change", function(){
+      if(sel.value === "__add__"){
+        form.hidden = false;
+        var first = form.querySelector(".ts-code") || form.querySelector(".ts-label");
+        first.focus();
+      } else {
+        form.hidden = true;
+        onChange(sel.value || null);
+      }
+    });
+    form.querySelector(".ts-cancel").addEventListener("click", function(){
+      form.hidden = true; sel.value = ""; onChange(null);
+    });
+    form.querySelector(".ts-confirm").addEventListener("click", function(){
+      if(kind === "area"){
+        var code = form.querySelector(".ts-code").value.trim();
+        var label = form.querySelector(".ts-label").value.trim();
+        if(!code){ form.querySelector(".ts-code").focus(); return; }
+        if(effectiveAreas().indexOf(code) === -1){ customAreas.push({code:code, label:label}); persistOptions(); renderFilters(); }
+        form.hidden = true;
+        onChange(code);
+      } else {
+        var name = form.querySelector(".ts-label").value.trim();
+        if(!name){ form.querySelector(".ts-label").focus(); return; }
+        if(effectiveSubs().indexOf(name) === -1){ customSubs.push(name); persistOptions(); renderFilters(); }
+        form.hidden = true;
+        onChange(name);
+      }
+    });
+  }
+
+  /* ---------------- quick-add controls ---------------- */
+  var quickState = { area: null, sub: null, priority: "Normal", dueDate: null };
+
+  function renderQuickControls(){
+    var el = document.getElementById("quickControls");
+    if(!el) return;
+    var prioOpts = PRIORITIES.map(function(p){
+      return '<option value="' + p + '"' + (quickState.priority === p ? " selected" : "") + '>' + p + "</option>";
+    }).join("");
+    el.innerHTML =
+      tagSelectHTML("qaArea", "area", quickState.area) +
+      tagSelectHTML("qaSub", "sub", quickState.sub) +
+      '<select id="qaPriority">' + prioOpts + '</select>' +
+      '<input type="date" id="qaDue" value="' + (quickState.dueDate || "") + '"/>';
+    wireTagSelect("qaArea", "area", function(v){ quickState.area = v; renderQuickControls(); });
+    wireTagSelect("qaSub", "sub", function(v){ quickState.sub = v; renderQuickControls(); });
+    document.getElementById("qaPriority").addEventListener("change", function(e){ quickState.priority = e.target.value; });
+    document.getElementById("qaDue").addEventListener("change", function(e){ quickState.dueDate = e.target.value || null; });
+  }
+
+  /* ---------------- data layer ---------------- */
+  function getTask(id){ for(var i=0;i<tasks.length;i++){ if(tasks[i].id===id) return tasks[i]; } return null; }
+
+  function seedIfEmpty(){
+    var t = todayISO();
+    function iso(offset){ var d = new Date(t); d.setDate(d.getDate()+offset); return d.toISOString().slice(0,10); }
+    var seeds = [
+      { title:"Kontrollera dörrfoder, Sektionsfickor", area:"741", sub:"Procyon", priority:"Normal", dueDate: iso(1), status:"Att göra",
+        objects:[], drawings:[], photos:[], comments:[], example:true },
+      { title:"Följ upp brandtätning, Fläkthus", area:"744", sub:"JIAB", priority:"Hög", dueDate: iso(3), status:"Pågår",
+        objects:[], drawings:[{name:"K-40-744-010", rev:"B", title:"Stomritning Fläkthus"}], photos:[], comments:[], example:true },
+      { title:"Ny ritningsrevision, Förtjockarhus", area:"745", sub:null, priority:"Låg", dueDate: iso(7), status:"Väntar",
+        objects:[], drawings:[{name:"V-40-745-004", rev:"A", title:"VVS-schema Förtjockarhus"}], photos:[], comments:[], example:true },
+      { title:"Fota schakt innan gjutning, Sikthall", area:"742", sub:"AFI", priority:"Akut", dueDate: iso(0), status:"Att göra",
+        objects:[], drawings:[], photos:[], comments:[], example:true }
+    ];
+    var now = new Date().toISOString();
+    seeds.forEach(function(s){
+      s.notes = ""; s.createdAt = now; s.updatedAt = now; s.repeat = null; s.id = uid();
+      tasks.push(s);
+    });
+    Store.writeTasks(tasks);
+  }
+
+  function initData(){
+    loadOptions();
+    tasks = Store.readTasks();
+    if(!tasks.length) seedIfEmpty();
+  }
+
+  function nextDueDate(current, repeat){
+    var base = current ? new Date(current + "T00:00:00") : new Date(todayISO());
+    if(repeat === "weekly") base.setDate(base.getDate() + 7);
+    else if(repeat === "biweekly") base.setDate(base.getDate() + 14);
+    else if(repeat === "monthly") base.setMonth(base.getMonth() + 1);
+    else return current;
+    return base.toISOString().slice(0,10);
+  }
+
+  function createTask(fields, opts){
+    opts = opts || {};
+    var now = new Date().toISOString();
+    var data = {
+      title: fields.title || "Namnlös uppgift", notes: fields.notes || "",
+      status: fields.status || "Att göra", priority: fields.priority || "Normal",
+      area: fields.area || null, sub: fields.sub || null, dueDate: fields.dueDate || null,
+      repeat: fields.repeat || null,
+      createdAt: now, updatedAt: now,
+      objects: fields.objects || [], drawings: fields.drawings || [],
+      photos: fields.photos || [], comments: fields.comments || [], example: false,
+      id: uid()
+    };
+    tasks.push(data);
+    if(!Store.writeTasks(tasks)){
+      tasks.pop();
+      alert("Kunde inte spara uppgiften — webbläsarens lokala lagring är full. Ta bort några gamla uppgifter eller foton och försök igen.");
+      return Promise.resolve(null);
+    }
+    renderAll();
+    if(opts.open){
+      openTaskId = data.id;
+      renderDrawer(data);
+      document.getElementById("overlay").classList.add("show");
+      document.getElementById("drawer").classList.add("show");
+      document.getElementById("fabPhoto").style.display = "none";
+    }
+    return Promise.resolve(data.id);
+  }
+
+  function updateTask(id, patch){
+    var existing = getTask(id);
+    if(!existing) return;
+    var willComplete = existing.status !== "Klar" && patch.status === "Klar";
+    var repeatSnapshot = willComplete ? {
+      title: existing.title, notes: existing.notes, priority: existing.priority,
+      area: existing.area, sub: existing.sub, repeat: existing.repeat,
+      dueDate: nextDueDate(existing.dueDate, existing.repeat),
+      objects: (existing.objects || []).slice(), drawings: (existing.drawings || []).slice()
+    } : null;
+
+    var before = Object.assign({}, existing);
+    Object.assign(existing, patch, {updatedAt: new Date().toISOString()});
+    if(!Store.writeTasks(tasks)){
+      Object.assign(existing, before);
+      alert("Kunde inte spara ändringen — webbläsarens lokala lagring är full.");
+      return;
+    }
+    renderAll();
+    if(openTaskId === id) renderDrawer(existing);
+    if(repeatSnapshot && repeatSnapshot.repeat) createTask(repeatSnapshot);
+  }
+
+  function deleteTask(id){
+    tasks = tasks.filter(function(t){ return t.id !== id; });
+    Store.writeTasks(tasks);
+    closeDrawer();
+    renderAll();
+  }
+
+  /* ---------------- Trimble Connect Workspace API ---------------- */
+  function setConnStatus(text, standalone){
+    var el = document.getElementById("connStatus");
+    if(el) el.textContent = text;
+    var banner = document.getElementById("connBanner");
+    if(banner) banner.hidden = !standalone;
+  }
+
+  function handleTcEvent(event, data){
+    console.log("TC event:", event, data);
+  }
+
+  function connectToTrimbleConnect(){
+    if(typeof TrimbleConnectWorkspace === "undefined"){
+      setConnStatus("Fristående läge — Workspace API-skriptet kunde inte laddas.", true);
+      return;
+    }
+    TrimbleConnectWorkspace.connect(window.parent, handleTcEvent, 20000).then(function(api){
+      TC = api;
+      TC.viewer.getModels().then(function(models){
+        (models || []).forEach(function(m){ tcModelNames[m.id] = m.name; });
+      }).catch(function(e){ console.warn("getModels failed", e); });
+      TC.project.getProject().then(function(project){
+        setConnStatus("Kopplad · " + (project && project.name ? project.name : "Trimble Connect-projekt"), false);
+      }).catch(function(){ setConnStatus("Kopplad till Trimble Connect", false); });
+    }).catch(function(err){
+      console.warn("TC connect failed", err);
+      setConnStatus("Fristående läge — ingen koppling till Trimble Connect just nu.", true);
+    });
+  }
+
+  /* Selection can come back either as an array of {modelId, objectRuntimeIds}
+     groups directly, or wrapped as {modelObjectIds:[...]} — handle both. */
+  function normalizeSelection(selection){
+    if(!selection) return [];
+    if(Array.isArray(selection)) return selection;
+    if(Array.isArray(selection.modelObjectIds)) return selection.modelObjectIds;
+    return [];
+  }
+
+  /* Best-effort name lookup inside a property set when product.name is empty. */
+  function propertyScanName(p){
+    var sets = p.properties || [];
+    for(var i=0;i<sets.length;i++){
+      var props = (sets[i] && sets[i].properties) || [];
+      for(var j=0;j<props.length;j++){
+        var key = ((props[j].name || props[j].displayName || "") + "").toLowerCase();
+        if(key === "name" || key === "objektnamn"){
+          return props[j].value || props[j].displayValue || null;
+        }
+      }
+    }
+    return null;
+  }
+
+  function fetchSelectionFromModel(){
+    if(!TC){
+      alert("Ingen koppling till Trimble Connect just nu — öppna tillägget inifrån ett projekt i 3D-vyn.");
+      return Promise.resolve([]);
+    }
+    return TC.viewer.getSelection().then(function(selection){
+      var groups = normalizeSelection(selection).filter(function(g){ return g.objectRuntimeIds && g.objectRuntimeIds.length; });
+      if(!groups.length){
+        alert("Inget markerat i modellen just nu. Markera ett eller flera objekt i 3D-vyn och försök igen.");
+        return [];
+      }
+      return Promise.all(groups.map(function(g){
+        return Promise.all([
+          TC.viewer.getObjectProperties(g.modelId, g.objectRuntimeIds),
+          TC.viewer.convertToObjectIds(g.modelId, g.objectRuntimeIds).catch(function(){ return []; })
+        ]).then(function(res){
+          var props = res[0] || [], extIds = res[1] || [];
+          return props.map(function(p, i){
+            return {
+              name: (p.product && p.product.name) || propertyScanName(p) || ("Objekt #" + p.id),
+              guid: extIds[i] || "",
+              model: tcModelNames[g.modelId] || g.modelId,
+              modelId: g.modelId,
+              runtimeId: p.id
+            };
+          });
+        });
+      })).then(function(nested){
+        var flat = [];
+        nested.forEach(function(arr){ flat = flat.concat(arr); });
+        return flat;
+      });
+    }).catch(function(err){
+      console.warn("getSelection failed", err);
+      alert("Kunde inte hämta markeringen från modellen just nu.");
+      return [];
+    });
+  }
+
+  function selectInModel(o){
+    if(!TC){ alert("Ingen koppling till Trimble Connect just nu."); return; }
+    if(!o.modelId || o.runtimeId == null){ alert("Det här objektet har ingen sparad modellreferens (troligen tillagt manuellt)."); return; }
+    TC.viewer.setSelection({modelObjectIds:[{modelId:o.modelId, objectRuntimeIds:[o.runtimeId]}]}, "set")
+      .catch(function(err){ console.warn("setSelection failed", err); alert("Kunde inte visa objektet i modellen."); });
+  }
+
+  /* ---------------- rendering: filters ---------------- */
+  function renderFilters(){
+    var el = document.getElementById("filters");
+    var html = '<div class="filter-group" id="areaFilters">';
+    effectiveAreas().forEach(function(a){
+      html += '<button type="button" class="fbtn' + (filters.area.has(a) ? " on" : "") + '" data-area="' + a + '">#' + a + "</button>";
+    });
+    html += '</div><div class="filter-group" id="subFilters">';
+    effectiveSubs().forEach(function(s){
+      html += '<button type="button" class="fbtn' + (filters.sub.has(s) ? " on" : "") + '" data-sub="' + esc(s) + '">' + esc(s) + "</button>";
+    });
+    html += '</div><button type="button" class="fbtn' + (filters.onlyPriority ? " on" : "") + '" id="prioFilterBtn">Hög/Akut</button>';
+    html += '<button type="button" class="fbtn" id="exportBtn">' + ICON.download + ' Exportera öppna punkter</button>';
+    html += '<div class="search-box">' + ICON.search + '<input type="text" id="searchInput" placeholder="Sök..." value="' + esc(filters.q) + '"/></div>';
+    el.innerHTML = html;
+
+    el.querySelectorAll("[data-area]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var v = b.getAttribute("data-area");
+        filters.area.has(v) ? filters.area.delete(v) : filters.area.add(v);
+        renderFilters(); renderMain();
+      });
+    });
+    el.querySelectorAll("[data-sub]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var v = b.getAttribute("data-sub");
+        filters.sub.has(v) ? filters.sub.delete(v) : filters.sub.add(v);
+        renderFilters(); renderMain();
+      });
+    });
+    document.getElementById("prioFilterBtn").addEventListener("click", function(){
+      filters.onlyPriority = !filters.onlyPriority; renderFilters(); renderMain();
+    });
+    document.getElementById("searchInput").addEventListener("input", function(e){
+      filters.q = e.target.value; renderMain();
+    });
+    document.getElementById("exportBtn").addEventListener("click", exportOpenTasks);
+  }
+
+  function passesFilter(t){
+    if(filters.area.size && !filters.area.has(t.area)) return false;
+    if(filters.sub.size && !filters.sub.has(t.sub)) return false;
+    if(filters.onlyPriority && !(t.priority === "Hög" || t.priority === "Akut")) return false;
+    if(filters.q){
+      var q = filters.q.toLowerCase();
+      if((t.title||"").toLowerCase().indexOf(q) === -1 && (t.notes||"").toLowerCase().indexOf(q) === -1) return false;
+    }
+    return true;
+  }
+
+  function sortTasks(list){
+    return list.slice().sort(function(a,b){
+      if(!!a.dueDate !== !!b.dueDate) return a.dueDate ? -1 : 1;
+      if(a.dueDate && b.dueDate && a.dueDate !== b.dueDate) return a.dueDate < b.dueDate ? -1 : 1;
+      var pOrder = {"Akut":0,"Hög":1,"Normal":2,"Låg":3};
+      return (pOrder[a.priority]??2) - (pOrder[b.priority]??2);
+    });
+  }
+
+  /* ---------------- rendering: today strip ---------------- */
+  function renderTodayStrip(){
+    var row = document.getElementById("todayRow");
+    var t = todayISO();
+    var urgent = tasks.filter(function(x){
+      if(x.status === "Klar" || !x.dueDate) return false;
+      var d = new Date(x.dueDate + "T00:00:00");
+      return d <= t;
+    });
+    urgent = sortTasks(urgent);
+    row.innerHTML = urgent.map(function(x){
+      var d = new Date(x.dueDate + "T00:00:00");
+      var isToday = d.getTime() === t.getTime();
+      return '<div class="today-card' + (isToday ? " today" : "") + '" data-open="' + x.id + '">' +
+        '<div class="t-title">' + esc(x.title) + '</div>' +
+        '<div class="t-meta">' +
+          (x.area ? '<span class="chip chip-area">#'+x.area+'</span>' : "") +
+          (x.sub ? '<span class="chip chip-sub">'+esc(x.sub)+'</span>' : "") +
+          '<span class="chip chip-due ' + (isToday?"due-today":"due-over") + '">' + (isToday? "Idag" : dueClass(x.dueDate,x.status).label) + '</span>' +
+        '</div></div>';
+    }).join("");
+    row.querySelectorAll("[data-open]").forEach(function(el){
+      el.addEventListener("click", function(){ openDrawer(el.getAttribute("data-open")); });
+    });
+  }
+
+  /* ---------------- rendering: task card ---------------- */
+  function taskCardHTML(t){
+    var due = dueClass(t.dueDate, t.status);
+    var dot = t.priority || "Normal";
+    return '<div class="task-card' + (t.status==="Klar"?" done":"") + '" data-open="' + t.id + '" draggable="true" data-drag="' + t.id + '">' +
+      '<div class="t-top"><span class="prio-dot ' + dot + '"></span><span class="t-title">' + esc(t.title) + '</span></div>' +
+      '<div class="t-meta">' +
+        (t.area ? '<span class="chip chip-area">#'+t.area+'</span>' : "") +
+        (t.sub ? '<span class="chip chip-sub">'+esc(t.sub)+'</span>' : "") +
+        (t.dueDate ? '<span class="chip chip-due ' + due.cls + '">' + due.label + '</span>' : "") +
+        (t.repeat ? '<span class="chip chip-ghost">'+ICON.repeat+" "+REPEAT_LABELS[t.repeat]+'</span>' : "") +
+        (t.example ? '<span class="chip chip-example">exempel</span>' : "") +
+        '<span class="t-links">' +
+          ((t.objects&&t.objects.length) ? '<span>'+ICON.link+t.objects.length+'</span>' : "") +
+          ((t.drawings&&t.drawings.length) ? '<span>'+ICON.drawing+t.drawings.length+'</span>' : "") +
+          ((t.photos&&t.photos.length) ? '<span>'+ICON.photo+t.photos.length+'</span>' : "") +
+        '</span>' +
+      '</div></div>';
+  }
+
+  function bindCardOpen(root){
+    root.querySelectorAll("[data-open]").forEach(function(el){
+      el.addEventListener("click", function(){ openDrawer(el.getAttribute("data-open")); });
+    });
+  }
+
+  /* ---------------- rendering: list view ---------------- */
+  function renderListView(){
+    var filtered = tasks.filter(passesFilter);
+    var main = document.getElementById("main");
+    var html = "";
+    STATUSES.forEach(function(status){
+      var list = sortTasks(filtered.filter(function(t){ return t.status === status; }));
+      var isCollapsed = !!collapsed[status];
+      html += '<div class="section' + (isCollapsed?" collapsed":"") + '" data-status="' + status + '">' +
+        '<div class="section-head" data-toggle="' + status + '"><h2>' + status + '</h2><span class="count">' + list.length + '</span>' + ICON.chev + '</div>' +
+        '<div class="card-list">' + list.map(taskCardHTML).join("") + '</div>' +
+      '</div>';
+    });
+    main.innerHTML = html;
+    main.querySelectorAll("[data-toggle]").forEach(function(h){
+      h.addEventListener("click", function(){
+        var s = h.getAttribute("data-toggle");
+        collapsed[s] = !collapsed[s];
+        renderListView();
+      });
+    });
+    bindCardOpen(main);
+  }
+
+  /* ---------------- rendering: board view ---------------- */
+  function renderBoardView(){
+    var filtered = tasks.filter(passesFilter);
+    var main = document.getElementById("main");
+    var html = '<div class="board">';
+    STATUSES.forEach(function(status){
+      var list = sortTasks(filtered.filter(function(t){ return t.status === status; }));
+      html += '<div class="board-col" data-col="' + status + '">' +
+        '<div class="board-col-head">' + status + '<span class="count">' + list.length + '</span></div>' +
+        '<div class="card-list">' + list.map(taskCardHTML).join("") + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    main.innerHTML = html;
+    bindCardOpen(main);
+
+    var cols = main.querySelectorAll(".board-col");
+    var cards = main.querySelectorAll("[data-drag]");
+    cards.forEach(function(c){
+      c.addEventListener("dragstart", function(e){ e.dataTransfer.setData("text/plain", c.getAttribute("data-drag")); });
+    });
+    cols.forEach(function(col){
+      col.addEventListener("dragover", function(e){ e.preventDefault(); col.classList.add("drop-hover"); });
+      col.addEventListener("dragleave", function(){ col.classList.remove("drop-hover"); });
+      col.addEventListener("drop", function(e){
+        e.preventDefault(); col.classList.remove("drop-hover");
+        var id = e.dataTransfer.getData("text/plain");
+        var newStatus = col.getAttribute("data-col");
+        if(id) updateTask(id, {status:newStatus});
+      });
+    });
+  }
+
+  function renderMain(){
+    if(view === "list") renderListView(); else renderBoardView();
+  }
+
+  function renderAll(){
+    renderTodayStrip();
+    renderMain();
+  }
+
+  /* ---------------- drawer (task detail) ---------------- */
+  function openDrawer(id){
+    openTaskId = id;
+    renderDrawer(getTask(id));
+    document.getElementById("overlay").classList.add("show");
+    document.getElementById("drawer").classList.add("show");
+    document.getElementById("fabPhoto").style.display = "none";
+  }
+  function closeDrawer(){
+    openTaskId = null;
+    document.getElementById("overlay").classList.remove("show");
+    document.getElementById("drawer").classList.remove("show");
+    document.getElementById("fabPhoto").style.display = "flex";
+  }
+
+  function renderDrawer(t){
+    var drawer = document.getElementById("drawer");
+    if(!t){ drawer.innerHTML = ""; return; }
+
+    var statusOpts = STATUSES.map(function(s){ return '<option value="'+s+'"'+(t.status===s?" selected":"")+'>'+s+'</option>'; }).join("");
+    var prioOpts = PRIORITIES.map(function(p){ return '<option value="'+p+'"'+(t.priority===p?" selected":"")+'>'+p+'</option>'; }).join("");
+    var repeatOpts = Object.keys(REPEAT_LABELS).map(function(k){ return '<option value="'+k+'"'+((t.repeat||"")===k?" selected":"")+'>'+REPEAT_LABELS[k]+'</option>'; }).join("");
+
+    var objectsHTML = (t.objects||[]).map(function(o,i){
+      var showBtn = (o.modelId && o.runtimeId != null) ? '<button data-show-obj="'+i+'" title="Visa i modellen">'+ICON.target+'</button>' : "";
+      return '<div class="link-item"><div class="li-main"><div class="li-name">'+esc(o.name)+'</div><div class="li-sub">'+esc(o.model||"")+' · '+esc(o.guid||"—")+'</div></div>'+showBtn+'<button data-rm-obj="'+i+'">'+ICON.close+'</button></div>';
+    }).join("");
+    var drawingsHTML = (t.drawings||[]).map(function(d,i){
+      return '<div class="link-item"><div class="li-main"><div class="li-name">'+esc(d.name)+' rev '+esc(d.rev||"-")+'</div><div class="li-sub">'+esc(d.title||"")+'</div></div><button data-rm-draw="'+i+'">'+ICON.close+'</button></div>';
+    }).join("");
+    var photosHTML = (t.photos||[]).map(function(dataUrl, i){
+      return '<div class="photo-thumb"><img src="'+dataUrl+'" alt="Platsfoto"/><button data-rm-photo="'+i+'">'+ICON.close+'</button></div>';
+    }).join("");
+    var commentsHTML = (t.comments||[]).map(function(c){
+      return '<div class="comment">'+esc(c.text)+'<span class="c-time">'+relTime(c.at)+'</span></div>';
+    }).join("");
+
+    drawer.innerHTML =
+      '<div class="drawer-head">' +
+        '<input class="title-input" id="dTitle" value="'+esc(t.title)+'" />' +
+        '<button class="drawer-close" id="dClose">'+ICON.close+'</button>' +
+      '</div>' +
+      '<div class="drawer-body">' +
+        '<div class="field"><label>Anteckning</label><textarea id="dNotes" placeholder="Detaljer, kontext, vad som behöver göras...">'+esc(t.notes||"")+'</textarea></div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Status</label><select id="dStatus">'+statusOpts+'</select></div>' +
+          '<div class="field"><label>Prioritet</label><select id="dPrio">'+prioOpts+'</select></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Förfaller</label><input type="date" id="dDue" value="'+(t.dueDate||"")+'"/></div>' +
+          '<div class="field"><label>Upprepning</label><select id="dRepeat">'+repeatOpts+'</select></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Platsområde</label>'+tagSelectHTML("drArea","area",t.area)+'</div>' +
+          '<div class="field"><label>Underentreprenör</label>'+tagSelectHTML("drSub","sub",t.sub)+'</div>' +
+        '</div>' +
+
+        '<div class="link-section">' +
+          '<h3>'+ICON.link+' Länkade objekt</h3>' +
+          '<div class="link-list">'+(objectsHTML||"")+'</div>' +
+          '<div class="link-actions">' +
+            '<button type="button" class="ghost-btn" id="fetchSelectionBtn">'+ICON.target+' Hämta markering i modellen</button>' +
+            '<button type="button" class="ghost-btn" id="toggleObjPicker">'+ICON.plus+' Ange manuellt</button>' +
+          '</div>' +
+          '<div class="picker" id="objPicker">' +
+            '<div class="manual-add"><input id="manObjName" placeholder="Objektnamn"/><button id="manObjAdd">Lägg till</button></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="link-section">' +
+          '<h3>'+ICON.drawing+' Länkade ritningar</h3>' +
+          '<div class="link-list">'+(drawingsHTML||"")+'</div>' +
+          '<div class="link-actions">' +
+            '<button type="button" class="ghost-btn" id="toggleDrawPicker">'+ICON.plus+' Länka ritning manuellt</button>' +
+          '</div>' +
+          '<div class="picker" id="drawPicker">' +
+            '<div class="manual-add"><input id="manDrawName" placeholder="Ritningsnummer, t.ex. A-40-741-001"/><button id="manDrawAdd">Lägg till</button></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="link-section">' +
+          '<h3>'+ICON.photo+' Foton</h3>' +
+          '<div class="photo-grid">'+(photosHTML||"")+'</div>' +
+          '<div class="link-actions">' +
+            '<label class="ghost-btn" for="photoInput">'+ICON.plus+' Lägg till foto</label>' +
+            '<input type="file" id="photoInput" accept="image/*" multiple style="display:none" />' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="link-section">' +
+          '<h3>Kommentarer</h3>' +
+          '<div class="comments">'+(commentsHTML||"")+'</div>' +
+          '<div class="comment-add" style="margin-top:8px;"><input id="commentInput" placeholder="Skriv en kommentar..."/><button id="commentAdd">Lägg till</button></div>' +
+        '</div>' +
+
+        '<div class="danger-zone"><button class="delete-task" id="dDelete">'+ICON.trash+' Ta bort uppgift</button></div>' +
+      '</div>' +
+      '<div class="sync-note">Sparas lokalt i den här webbläsaren · Uppdaterad ' + relTime(t.updatedAt) + '</div>';
+
+    document.getElementById("dClose").addEventListener("click", closeDrawer);
+    document.getElementById("dTitle").addEventListener("change", function(e){ updateTask(t.id, {title: e.target.value || "Namnlös uppgift"}); });
+    document.getElementById("dNotes").addEventListener("change", function(e){ updateTask(t.id, {notes: e.target.value}); });
+    document.getElementById("dStatus").addEventListener("change", function(e){ updateTask(t.id, {status: e.target.value}); });
+    document.getElementById("dPrio").addEventListener("change", function(e){ updateTask(t.id, {priority: e.target.value}); });
+    document.getElementById("dDue").addEventListener("change", function(e){ updateTask(t.id, {dueDate: e.target.value || null}); });
+    document.getElementById("dRepeat").addEventListener("change", function(e){ updateTask(t.id, {repeat: e.target.value || null}); });
+    wireTagSelect("drArea", "area", function(v){ updateTask(t.id, {area: v}); });
+    wireTagSelect("drSub", "sub", function(v){ updateTask(t.id, {sub: v}); });
+    document.getElementById("dDelete").addEventListener("click", function(){
+      if(confirm("Ta bort uppgiften \"" + t.title + "\"?")) deleteTask(t.id);
+    });
+
+    document.getElementById("toggleObjPicker").addEventListener("click", function(){ document.getElementById("objPicker").classList.toggle("show"); });
+    document.getElementById("toggleDrawPicker").addEventListener("click", function(){ document.getElementById("drawPicker").classList.toggle("show"); });
+
+    document.getElementById("fetchSelectionBtn").addEventListener("click", function(){
+      var btn = this;
+      btn.disabled = true;
+      var originalText = btn.innerHTML;
+      btn.innerHTML = ICON.target + " Hämtar…";
+      fetchSelectionFromModel().then(function(found){
+        btn.disabled = false; btn.innerHTML = originalText;
+        if(!found.length) return;
+        var arr = (getTask(t.id).objects || []).slice();
+        found.forEach(function(o){
+          var dup = arr.some(function(x){ return (o.guid && x.guid === o.guid) || (x.modelId === o.modelId && x.runtimeId === o.runtimeId); });
+          if(!dup) arr.push(o);
+        });
+        updateTask(t.id, {objects: arr});
+      });
+    });
+    drawer.querySelectorAll("[data-show-obj]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var o = (getTask(t.id).objects || [])[+btn.getAttribute("data-show-obj")];
+        if(o) selectInModel(o);
+      });
+    });
+    drawer.querySelectorAll("[data-rm-obj]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var arr = (getTask(t.id).objects || []).slice();
+        arr.splice(+btn.getAttribute("data-rm-obj"), 1);
+        updateTask(t.id, {objects: arr});
+      });
+    });
+    drawer.querySelectorAll("[data-rm-draw]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var arr = (getTask(t.id).drawings || []).slice();
+        arr.splice(+btn.getAttribute("data-rm-draw"), 1);
+        updateTask(t.id, {drawings: arr});
+      });
+    });
+
+    document.getElementById("manObjAdd").addEventListener("click", function(){
+      var v = document.getElementById("manObjName").value.trim();
+      if(!v) return;
+      var arr = (getTask(t.id).objects || []).slice();
+      arr.push({name:v, guid:"", model:"manuell"});
+      updateTask(t.id, {objects: arr});
+    });
+    document.getElementById("manDrawAdd").addEventListener("click", function(){
+      var v = document.getElementById("manDrawName").value.trim();
+      if(!v) return;
+      var arr = (getTask(t.id).drawings || []).slice();
+      arr.push({name:v, rev:"-", title:"Manuellt tillagd"});
+      updateTask(t.id, {drawings: arr});
+    });
+
+    drawer.querySelectorAll("[data-rm-photo]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var arr = (getTask(t.id).photos || []).slice();
+        arr.splice(+btn.getAttribute("data-rm-photo"), 1);
+        updateTask(t.id, {photos: arr});
+      });
+    });
+    document.getElementById("photoInput").addEventListener("change", function(e){
+      var files = Array.prototype.slice.call(e.target.files || []);
+      if(!files.length) return;
+      var current = (getTask(t.id).photos || []).slice();
+      Promise.all(files.map(downscalePhoto)).then(function(dataUrls){
+        dataUrls.filter(Boolean).forEach(function(u){ current.push(u); });
+        updateTask(t.id, {photos: current});
+        e.target.value = "";
+      });
+    });
+
+    document.getElementById("commentAdd").addEventListener("click", function(){
+      var input = document.getElementById("commentInput");
+      var v = input.value.trim();
+      if(!v) return;
+      var arr = (getTask(t.id).comments || []).slice();
+      arr.push({text:v, at:new Date().toISOString()});
+      updateTask(t.id, {comments: arr});
+      input.value = "";
+    });
+  }
+
+  /* Downscales an image to at most 1280px on the long edge and re-encodes it
+     as JPEG (quality 0.72) so a handful of site photos fit comfortably inside
+     localStorage's ~5-10MB per-origin quota. Resolves null on failure. */
+  function downscalePhoto(file){
+    return new Promise(function(resolve){
+      var img = new Image();
+      var reader = new FileReader();
+      reader.onload = function(){
+        img.onload = function(){
+          var maxSide = 1280;
+          var scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+          var canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          try{ resolve(canvas.toDataURL("image/jpeg", 0.72)); }
+          catch(e){ resolve(null); }
+        };
+        img.onerror = function(){ resolve(null); };
+        img.src = reader.result;
+      };
+      reader.onerror = function(){ resolve(null); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* ---------------- quick photo capture ---------------- */
+  function quickPhotoCapture(fileList){
+    var files = Array.prototype.slice.call(fileList || []);
+    if(!files.length) return;
+    var now = new Date();
+    var label = "Foto " + now.toLocaleDateString("sv-SE",{day:"numeric",month:"short"}) + " " + now.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+    createTask({title:label, dueDate: todayISO().toISOString().slice(0,10)}, {open:true}).then(function(id){
+      if(!id) return;
+      Promise.all(files.map(downscalePhoto)).then(function(dataUrls){
+        var valid = dataUrls.filter(Boolean);
+        if(valid.length) updateTask(id, {photos: valid});
+      });
+    });
+  }
+
+  /* ---------------- export ---------------- */
+  function csvField(v){
+    v = String(v == null ? "" : v);
+    if(/[",\n;]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+    return v;
+  }
+  function toCSV(list){
+    var header = ["Titel","Status","Prioritet","Platsområde","UE","Förfaller","Länkade objekt","Länkade ritningar","Foton","Kommentarer"];
+    var rows = list.map(function(t){
+      return [
+        t.title, t.status, t.priority,
+        t.area ? ("#" + t.area + " " + areaLabel(t.area)) : "",
+        t.sub || "", t.dueDate || "",
+        (t.objects||[]).map(function(o){ return o.name; }).join("; "),
+        (t.drawings||[]).map(function(d){ return d.name + " rev " + d.rev; }).join("; "),
+        (t.photos||[]).length, (t.comments||[]).length
+      ];
+    });
+    return [header].concat(rows).map(function(r){ return r.map(csvField).join(","); }).join("\r\n");
+  }
+  function exportOpenTasks(){
+    var list = sortTasks(tasks.filter(function(t){ return t.status !== "Klar"; }));
+    if(!list.length){ alert("Inga öppna punkter att exportera just nu."); return; }
+    var csv = "﻿" + toCSV(list);
+    var filename = "platsminnet-oppna-punkter-" + new Date().toISOString().slice(0,10) + ".csv";
+    try{
+      var blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    }catch(e){
+      console.warn("export failed", e);
+      try{ navigator.clipboard.writeText(csv); alert("Kunde inte ladda ner filen — innehållet kopierades till urklipp istället."); }
+      catch(e2){ alert("Export misslyckades i den här vyn."); }
+    }
+  }
+
+  /* ---------------- wiring ---------------- */
+  document.getElementById("quickForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var input = document.getElementById("quickInput");
+    var raw = input.value.trim();
+    if(!raw) return;
+    createTask({
+      title: raw, area: quickState.area, sub: quickState.sub,
+      priority: quickState.priority, dueDate: quickState.dueDate
+    });
+    input.value = "";
+    quickState = { area: null, sub: null, priority: "Normal", dueDate: null };
+    renderQuickControls();
+  });
+
+  document.getElementById("viewToggle").addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-view]");
+    if(!btn) return;
+    view = btn.getAttribute("data-view");
+    document.querySelectorAll("#viewToggle button").forEach(function(b){ b.classList.toggle("active", b===btn); });
+    renderMain();
+  });
+
+  document.getElementById("overlay").addEventListener("click", closeDrawer);
+
+  document.getElementById("fabPhoto").addEventListener("click", function(){
+    document.getElementById("fabPhotoInput").click();
+  });
+  document.getElementById("fabPhotoInput").addEventListener("change", function(e){
+    quickPhotoCapture(e.target.files);
+    e.target.value = "";
+  });
+
+  document.getElementById("ideasToggle").addEventListener("click", function(){
+    document.getElementById("ideas").classList.toggle("open");
+  });
+
+  document.getElementById("bannerClose").addEventListener("click", function(){
+    var b = document.getElementById("infoBanner");
+    b.hidden = true;
+    try{ localStorage.setItem("platsminnet_banner_dismissed", "1"); }catch(e){}
+  });
+  try{
+    if(localStorage.getItem("platsminnet_banner_dismissed")) document.getElementById("infoBanner").hidden = true;
+  }catch(e){}
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA"){
+      e.preventDefault();
+      document.getElementById("quickInput").focus();
+    }
+    if(e.key === "Escape" && openTaskId) closeDrawer();
+  });
+
+  initData();
+  renderFilters();
+  renderQuickControls();
+  renderAll();
+  connectToTrimbleConnect();
+})();
+</script>
+</body>
+</html>
