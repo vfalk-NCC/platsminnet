@@ -1,7 +1,7 @@
 {
-  "title": "Platsminnet",
-  "url": "https://<ditt-github-användarnamn>.github.io/<repo-namn>/platsminnet-tc-extension.html",
-  "description": "Smart att-göra-lista kopplad till objekt, ritningar och foton på NSV.",
-  "icon": "https://<ditt-github-användarnamn>.github.io/<repo-namn>/icon.png",
-  "enabled": true
+"title": "Platsminnet",
+"url": "https://vfalk-ncc.github.io/platsminnet/index.html",
+"description": "Smart att-göra-lista kopplad till objekt, ritningar och foton på NSV.",
+"extensionType": ["project"],
+"enabled": true
 }
